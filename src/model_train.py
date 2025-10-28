@@ -40,8 +40,8 @@ def train_model(df, target_column):
     best_score = 0
     best_model_name = None
 
-    for name, model in models.items()
-        with mlflow.start_run(run_name=name)
+    for name, model in models.items():
+        with mlflow.start_run(run_name=name):
             pipeline = ImbPipeline([
                 ("preprocess", preprocessor),
                 ("smote", SMOTE(random_state=42)),  
