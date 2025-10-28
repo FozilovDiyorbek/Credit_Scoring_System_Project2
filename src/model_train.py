@@ -12,6 +12,8 @@ import pickle
 from IPython.core.interactiveshell import InteractiveShell
 InteractiveShell.ast_node_interactivity = "all"
 warnings.filterwarnings("ignore")
+import mlflow
+import mlflow.sklearn
 
 from featuring import create_preprocessing_pipeline
 
@@ -38,27 +40,37 @@ def train_model(df, target_column):
     best_score = 0
     best_model_name = None
 
-    for name, model in models.items():
-        pipeline = ImbPipeline([
-            ("preprocess", preprocessor),
-            ("smote", SMOTE(random_state=42)),  
-            ("model", model)
-        ])
+    for name, model in models.items()
+        with mlflow.start_run(run_name=name)
+            pipeline = ImbPipeline([
+                ("preprocess", preprocessor),
+                ("smote", SMOTE(random_state=42)),  
+                ("model", model)
+            ])
     
-        pipeline.fit(X_train, y_train)
-        y_pred = pipeline.predict(X_test)
+            pipeline.fit(X_train, y_train)
+            y_pred = pipeline.predict(X_test)
     
-        acc = accuracy_score(y_test, y_pred)
+            acc = accuracy_score(y_test, y_pred)
+
+            mlflow.log_param("model_name", name)
+            mlflow.log_metric("accuracy", acc)
+            mlflow.sklearn.log_model(pipeline, artifact_path="model")
     
-        if acc > best_score:
-            best_score = acc
-            best_model = pipeline
-            best_model_name = name
+            if acc > best_score:
+                best_score = acc
+                best_model = pipeline
+                best_model_name = name
 
     print(f"\nThe best model: {best_model_name} (Accuracy: {best_score:.4f})")
 
     # Save the best model
     with open("models/best_model.pkl", "wb") as f:
         pickle.dump(best_model, f)
+    
+    with mlflow.start_run(run_name="Best_Model"):
+        mlflow.log_param("best_modelm", best_model_name)
+        mlflow.log_metric("best_accuracy", best_score)
+        mlflow.sklearn.log_model(best_model, artifact_path="best_model")
 
     return best_model
