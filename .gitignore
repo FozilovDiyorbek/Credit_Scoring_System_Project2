@@ -2,3 +2,4 @@ catboost_info/
 notebooks/catboost_info/
 src/__pycache__/
 venv/
+app/__pycache__/
