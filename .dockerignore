@@ -1,0 +1,15 @@
+app/__pycache__/
+src/__pycache__/
+
+catboost_info/
+notebooks/catboost_info/
+
+data/
+
+.gitignore
+
+venv/
+
+notebooks/
+
+README.md
