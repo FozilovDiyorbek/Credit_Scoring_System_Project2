@@ -1,15 +1,19 @@
 app/__pycache__/
 src/__pycache__/
+tests/
+.pytest_cache/
 
 catboost_info/
-notebooks/catboost_info/
-
+notebooks/
 data/
 
 .gitignore
 
 venv/
 
-notebooks/
-
 README.md
+mlruns/
+
+*.log
+
+Makefile

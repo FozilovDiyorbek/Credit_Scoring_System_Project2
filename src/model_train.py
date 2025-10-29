@@ -14,26 +14,30 @@ InteractiveShell.ast_node_interactivity = "all"
 warnings.filterwarnings("ignore")
 import mlflow
 import mlflow.sklearn
+from src.featuring import create_preprocessing_pipeline
 
-from featuring import create_preprocessing_pipeline
 
-
-def train_model(df, target_column):
-
+def train_model(df, target_column, use_smote=True):
+    """
+    Modelni o'qituvchi asosiy funksiya.
+    use_smote=False bo'lsa, test paytida oversampling o'chiriladi.
+    """
     X = df.drop(columns=[target_column])
     y = df[target_column]
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42, stratify=y
+    )
 
     preprocessor = create_preprocessing_pipeline(df, target_column)
 
     models = {
-    "Logistic Regression": LogisticRegression(max_iter=1000),
-    "Random Forest": RandomForestClassifier(n_estimators=200, random_state=42),
-    "XGBoost": XGBClassifier(eval_metric='logloss', use_label_encoder=False, random_state=42),
-    "LightGBM": LGBMClassifier(random_state=42),
-    "Gradient Boosting": GradientBoostingClassifier(random_state=42),
-    "CatBoost": CatBoostClassifier(verbose=0, random_state=42)
+        "Logistic Regression": LogisticRegression(max_iter=1000),
+        "Random Forest": RandomForestClassifier(n_estimators=200, random_state=42),
+        "XGBoost": XGBClassifier(eval_metric='logloss', use_label_encoder=False, random_state=42),
+        "LightGBM": LGBMClassifier(random_state=42),
+        "Gradient Boosting": GradientBoostingClassifier(random_state=42),
+        "CatBoost": CatBoostClassifier(verbose=0, random_state=42)
     }
 
     best_model = None
@@ -42,21 +46,24 @@ def train_model(df, target_column):
 
     for name, model in models.items():
         with mlflow.start_run(run_name=name):
-            pipeline = ImbPipeline([
-                ("preprocess", preprocessor),
-                ("smote", SMOTE(random_state=42)),  
-                ("model", model)
-            ])
-    
+            steps = [("preprocess", preprocessor)]
+            
+            if use_smote:
+                steps.append(("smote", SMOTE(random_state=42)))
+
+            steps.append(("model", model))
+
+            pipeline = ImbPipeline(steps)
+
             pipeline.fit(X_train, y_train)
             y_pred = pipeline.predict(X_test)
-    
+
             acc = accuracy_score(y_test, y_pred)
 
             mlflow.log_param("model_name", name)
             mlflow.log_metric("accuracy", acc)
             mlflow.sklearn.log_model(pipeline, artifact_path="model")
-    
+
             if acc > best_score:
                 best_score = acc
                 best_model = pipeline
@@ -64,12 +71,12 @@ def train_model(df, target_column):
 
     print(f"\nThe best model: {best_model_name} (Accuracy: {best_score:.4f})")
 
-    # Save the best model
+
     with open("models/best_model.pkl", "wb") as f:
         pickle.dump(best_model, f)
-    
+
     with mlflow.start_run(run_name="Best_Model"):
-        mlflow.log_param("best_modelm", best_model_name)
+        mlflow.log_param("best_model", best_model_name)
         mlflow.log_metric("best_accuracy", best_score)
         mlflow.sklearn.log_model(best_model, artifact_path="best_model")
 

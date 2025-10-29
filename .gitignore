@@ -4,3 +4,5 @@ src/__pycache__/
 venv/
 app/__pycache__/
 mlruns/
+tests/__pycache__/
+.pytest_cache/

@@ -1,6 +1,6 @@
-from preprocess import load_data, clean_and_save_date
-from featuring import create_preprocessing_pipeline
-from model_train import train_model
+from src.preprocess import load_data, clean_and_save_date
+from src.featuring import create_preprocessing_pipeline
+from src.model_train import train_model
 import os
 
 def main():
