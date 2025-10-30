@@ -17,3 +17,5 @@ mlruns/
 *.log
 
 Makefile
+
+logs/
