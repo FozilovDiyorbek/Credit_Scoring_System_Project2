@@ -3,12 +3,12 @@ from app.schemes import CreditData
 from src.logger_config import setup_logger
 import pandas as pd
 import joblib
-from prometheus_fastapi_instrumentator import Instrumentator
+#from prometheus_fastapi_instrumentator import Instrumentator
 
 app = FastAPI(title="Credit Risk Scoring API")
 
-instrumentator = Instrumentator()
-instrumentator.instrument(app).expose(app)
+#instrumentator = Instrumentator()
+#instrumentator.instrument(app).expose(app)
 logger = setup_logger()
 
 model = joblib.load("models/best_model.pkl")
